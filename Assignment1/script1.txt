@@ -1,0 +1,192 @@
+Script started on 2018-09-27 01:59:46-06:00
+]0;kenneth.sharman@csa2:~/Documents/CPSC_355/A1kenneth.sharman@csa2:~/Documents/CPSC_355/A1$ gdb assign1a
+GNU gdb (GDB) Fedora 8.1.1-3.fc28
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "aarch64-redhat-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from assign1a...done.
+(gdb) [H[2J(gdb) display/i $pc
+1: x/i $pc
+<error: No registers.>
+(gdb) r[Kb test
+Breakpoint 1 at 0x4005fc: file assign1a.s, line 30.
+(gdb) r
+Starting program: /home/ugb/kenneth.sharman/Documents/CPSC_355/A1/assign1a 
+warning: the debug information found in "/usr/lib/debug//usr/lib64/ld-2.27.so.debug" does not match "/lib/ld-linux-aarch64.so.1" (CRC mismatch).
+
+Missing separate debuginfos, use: dnf debuginfo-install glibc-2.27-32.fc28.aarch64
+warning: the debug information found in "/usr/lib/debug//lib64/libc-2.27.so.debug" does not match "/lib64/libc.so.6" (CRC mismatch).
+
+warning: the debug information found in "/usr/lib/debug//usr/lib64/libc-2.27.so.debug" does not match "/lib64/libc.so.6" (CRC mismatch).
+
+   x	| f(x)	|  Max
+---------------------
+
+Breakpoint 1, test () at assign1a.s:30
+30	test:	cmp	x19, 5				// Compare x19, 5
+1: x/i $pc
+=> 0x4005fc <test>:	cmp	x19, #0x5
+(gdb) p $x19
+$1 = -6
+(gdb) p $x20
+$2 = -9999
+(gdb) p $[K[K[Kni
+31		b.gt	done				// If value in x19 > 5 go to 'done' label
+1: x/i $pc
+=> 0x400600 <test+4>:	b.gt	0x400650 <done>
+(gdb) ni
+eval () at assign1a.s:33
+33	eval:	mov	x21, 5				// x21 used to store y, initialized to 5
+1: x/i $pc
+=> 0x400604 <eval>:	mov	x21, #0x5                   	// #5
+(gdb) p $x19
+$3 = -6
+(gdb) p $x20[K1
+$4 = 4195472
+(gdb) ni
+34		mul	x21, x21, x19			// 5x
+1: x/i $pc
+=> 0x400608 <eval+4>:	mul	x21, x21, x19
+(gdb) p $x21
+$5 = 5
+(gdb) ni
+35		add	x21, x21, 31			// 5x + 31
+1: x/i $pc
+=> 0x40060c <eval+8>:	add	x21, x21, #0x1f
+(gdb) p $x21
+$6 = -30
+(gdb) ni
+36		mul	x21, x21, x22			// -5x - 31
+1: x/i $pc
+=> 0x400610 <eval+12>:	mul	x21, x21, x22
+(gdb) p $x21
+$7 = 1
+(gdb) p $x21[4Pni
+37		mul	x21, x21, x19			// -5x^2 - 31x
+1: x/i $pc
+=> 0x400614 <eval+16>:	mul	x21, x21, x19
+(gdb) nip $x21
+$8 = -1
+(gdb) p $x21[4Pni
+38		add	x21, x21, 4			// -5x^2 - 31x + 4
+1: x/i $pc
+=> 0x400618 <eval+20>:	add	x21, x21, #0x4
+(gdb) nip $x21
+$9 = 6
+(gdb) p $x21[4Pni
+39		mul	x21, x21, x19			// -5x^2 - 31x + 4x
+1: x/i $pc
+=> 0x40061c <eval+24>:	mul	x21, x21, x19
+(gdb) nip $x21
+$10 = 10
+(gdb) p $x21[4Pni
+40		add	x21, x21, 31			// -5x^2 - 31x + 4x + 31
+1: x/i $pc
+=> 0x400620 <eval+28>:	add	x21, x21, #0x1f
+(gdb) nip $x21
+$11 = -60
+(gdb) ni
+42		cmp	x20, x21			// Compare current max to y val in x21
+1: x/i $pc
+=> 0x400624 <eval+32>:	cmp	x20, x21
+(gdb) nip $x21
+$12 = -29
+(gdb) p $x20
+$13 = -9999
+(gdb) ni
+43		b.ge	show				// If current max >= y go to 'show' label
+1: x/i $pc
+=> 0x400628 <eval+36>:	b.ge	0x400630 <show>  // b.tcont
+(gdb) ni
+44		mov	x20, x21			// Else update current max with y
+1: x/i $pc
+=> 0x40062c <eval+40>:	mov	x20, x21
+(gdb) nip $x20
+$14 = -9999
+(gdb) ni
+show () at assign1a.s:46
+46	show:	adrp	x0, vals			// Arg 1: Address of vals string
+1: x/i $pc
+=> 0x400630 <show>:	adrp	x0, 0x400000
+(gdb) nip $x20
+$15 = -29
+(gdb) ni
+47		add	x0, x0, :lo12:vals		// Takes 2 steps to get address
+1: x/i $pc
+=> 0x400634 <show+4>:	add	x0, x0, #0x5bf
+(gdb) ni
+48		mov	x1, x19				// Arg 2: x val
+1: x/i $pc
+=> 0x400638 <show+8>:	mov	x1, x19
+(gdb) ni
+49		mov	x2, x21				// Arg 3: y val
+1: x/i $pc
+=> 0x40063c <show+12>:	mov	x2, x21
+(gdb) ni
+50		mov	x3, x20				// Arg 4: Current Max
+1: x/i $pc
+=> 0x400640 <show+16>:	mov	x3, x20
+(gdb) ni
+51		bl	printf				// Execute printf
+1: x/i $pc
+=> 0x400644 <show+20>:	bl	0x400480 <printf@plt>
+(gdb) ni
+  -6	| -29	|  -29
+53		add	x19, x19, 1			// Increment x-val by 1
+1: x/i $pc
+=> 0x400648 <show+24>:	add	x19, x19, #0x1
+(gdb) p $x19
+$16 = -6
+(gdb) ni
+55		b	test				// Return to start of the loop
+1: x/i $pc
+=> 0x40064c <show+28>:	b	0x4005fc <test>
+(gdb) nip $x19
+$17 = -5
+(gdb) ni
+
+Breakpoint 1, test () at assign1a.s:30
+30	test:	cmp	x19, 5				// Compare x19, 5
+1: x/i $pc
+=> 0x4005fc <test>:	cmp	x19, #0x5
+(gdb) ni
+31		b.gt	done				// If value in x19 > 5 go to 'done' label
+1: x/i $pc
+=> 0x400600 <test+4>:	b.gt	0x400650 <done>
+(gdb) ni
+eval () at assign1a.s:33
+33	eval:	mov	x21, 5				// x21 used to store y, initialized to 5
+1: x/i $pc
+=> 0x400604 <eval>:	mov	x21, #0x5                   	// #5
+(gdb) p $x19
+$18 = -5
+(gdb) p $x20
+$19 = -29
+(gdb) p $x21
+$20 = -29
+(gdb) ni
+34		mul	x21, x21, x19			// 5x
+1: x/i $pc
+=> 0x400608 <eval+4>:	mul	x21, x21, x19
+(gdb) nip $x21
+$21 = 5
+(gdb) q
+A debugging session is active.
+
+	Inferior 1 [process 17279] will be killed.
+
+Quit anyway? (y or n) y
+]0;kenneth.sharman@csa2:~/Documents/CPSC_355/A1kenneth.sharman@csa2:~/Documents/CPSC_355/A1$ exit
+exit
+
+Script done on 2018-09-27 02:06:15-06:00
