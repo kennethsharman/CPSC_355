@@ -4,6 +4,7 @@
 // Author:	Kenneth Sharman
 // Student ID:	00300185
 // Description:	Program finds the maximum of f(x) = -5x^3-31x^2+4x+31 in range -6 <= x <= 5
+//		Assumes the maximum value is greater than or equal to -9999
 
 tbl1:	.string "   x\t| f(x)\t|  Max\n"	// Table header
 tbl2:	.string "---------------------\n"	// Table Header Divider
