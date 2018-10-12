@@ -1,0 +1,294 @@
+Script started on 2018-10-12 02:16:25-06:00
+]0;kenneth.sharman@csa2:~/Documents/CPSC_355/A2kenneth.sharman@csa2:~/Documents/CPSC_355/A2$ gdb assign2a
+GNU gdb (GDB) Fedora 8.1.1-3.fc28
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "aarch64-redhat-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from assign2a...done.
+(gdb) display/i $pc
+1: x/i $pc
+<error: No registers.>
+(gdb) set listsize 35
+(gdb) list
+1	// CPSC 355:	Tutorial T06
+2	// Assignment:	#2a
+3	// Date:	October 11, 2018
+4	// Author:	Kenneth Sharman
+5	// Student ID:	00300185
+6	// Description:	ARMv8 assembly language program, translated from code written in C, that implements integer multiplication
+7	
+8	// Define 3 strings for initial, intermediate, and final print statements
+9	str1:	.string "multiplier = 0x%08x (%d) multiplicand = 0x%08x (%d)\n\n"
+10	str2:	.string "product = 0x%08x multiplier = 0x%08x\n"
+11	str3:	.string "64-bit result = 0x%016lx (%ld)\n"
+12	
+13	// Define Macros
+14		// 0 = 0
+15			// 1 = 1
+16		// Multiplicand
+17		// Multiplier
+18		// Product
+19			// Iteration index
+20		// Indicates if multiplier is negative
+21		// Result of multiplication
+22		// Temp variable 1 used in x25 concatenation
+23		// Temp variable 2 used in x25 concatenation
+24	
+25		.balign 4				// Ensures instructions are properly aligned
+26		.global main
+27	
+28	main:	stp	x20, x30, [sp, -16]!		// Saves state
+29		mov	x29, sp				// Saves state
+30		
+31		// Initialize variables
+32		mov	W20, -16843010		// Multiplicand = -16843010
+33		mov	W21,	70			// Multiplier = 70
+34		mov	W22, 0				// Product = 0
+35		mov	W23, 0				// Initialize iteration count to zero
+(gdb) b 31
+Breakpoint 1 at 0x400618: file assign2a.s, line 31.
+(gdb) r
+Starting program: /home/ugb/kenneth.sharman/Documents/CPSC_355/A2/assign2a 
+warning: the debug information found in "/usr/lib/debug//usr/lib64/ld-2.27.so.debug" does not match "/lib/ld-linux-aarch64.so.1" (CRC mismatch).
+
+Missing separate debuginfos, use: dnf debuginfo-install glibc-2.27-32.fc28.aarch64
+warning: the debug information found in "/usr/lib/debug//lib64/libc-2.27.so.debug" does not match "/lib64/libc.so.6" (CRC mismatch).
+
+warning: the debug information found in "/usr/lib/debug//usr/lib64/libc-2.27.so.debug" does not match "/lib64/libc.so.6" (CRC mismatch).
+
+
+Breakpoint 1, main () at assign2a.s:32
+32		mov	W20, -16843010		// Multiplicand = -16843010
+1: x/i $pc
+=> 0x400618 <main+8>:	mov	w20, #0xfefefefe            	// #-16843010
+(gdb) ni
+33		mov	W21,	70			// Multiplier = 70
+1: x/i $pc
+=> 0x40061c <main+12>:	mov	w21, #0x46                  	// #70
+(gdb) ni
+34		mov	W22, 0				// Product = 0
+1: x/i $pc
+=> 0x400620 <main+16>:	mov	w22, #0x0                   	// #0
+(gdb) ni
+35		mov	W23, 0				// Initialize iteration count to zero
+1: x/i $pc
+=> 0x400624 <main+20>:	mov	w23, #0x0                   	// #0
+(gdb) list
+18		// Product
+19			// Iteration index
+20		// Indicates if multiplier is negative
+21		// Result of multiplication
+22		// Temp variable 1 used in x25 concatenation
+23		// Temp variable 2 used in x25 concatenation
+24	
+25		.balign 4				// Ensures instructions are properly aligned
+26		.global main
+27	
+28	main:	stp	x20, x30, [sp, -16]!		// Saves state
+29		mov	x29, sp				// Saves state
+30		
+31		// Initialize variables
+32		mov	W20, -16843010		// Multiplicand = -16843010
+33		mov	W21,	70			// Multiplier = 70
+34		mov	W22, 0				// Product = 0
+35		mov	W23, 0				// Initialize iteration count to zero
+36	
+37		// Print out initial values of variables
+38		adrp	x0, str1			// Arg 1: Address of initial string to be printed
+39		add	x0, x0,	:lo12:str1		// Takes two steps to get the address
+40		mov	w1, W21			// Arg 2: Multiplier
+41		mov	w2, W21			// Arg 3: Multiplier
+42		mov	w3, W20			// Arg 4: Multiplicand
+43		mov	w4, W20			// Arg 5: Multiplicand
+44		bl	printf				// Execute printf
+45	
+46		// Determine if the multiplier is negative
+47		mov	w24, 0			// Assume multiplier is not negative
+48		cmp	W21, 0			// Compare multiplier and zero
+49		b.gt	top				// If multiplier > 0 go to top
+50		mov	w24, 1			// Otherwise multiplier is negative
+51	
+52		// Do repeated add and shift
+(gdb) b 47
+Breakpoint 2 at 0x400644: file assign2a.s, line 47.
+(gdb) c
+Continuing.
+multiplier = 0x00000046 (70) multiplicand = 0xfefefefe (-16843010)
+
+
+Breakpoint 2, main () at assign2a.s:47
+47		mov	w24, 0			// Assume multiplier is not negative
+1: x/i $pc
+=> 0x400644 <main+52>:	mov	w24, #0x0                   	// #0
+(gdb) ni
+48		cmp	W21, 0			// Compare multiplier and zero
+1: x/i $pc
+=> 0x400648 <main+56>:	cmp	w21, #0x0
+(gdb) p $w21
+$1 = 70
+(gdb) ni
+49		b.gt	top				// If multiplier > 0 go to top
+1: x/i $pc
+=> 0x40064c <main+60>:	b.gt	0x400654 <top>
+(gdb) b top
+Breakpoint 3 at 0x400654: file assign2a.s, line 53.
+(gdb) c
+Continuing.
+
+Breakpoint 3, top () at assign2a.s:53
+53	top:	tst	W21, 0x1			// Test if lsb of multiplier is 0 or 1
+1: x/i $pc
+=> 0x400654 <top>:	tst	w21, #0x1
+(gdb) p /t $w21
+$2 = 1000110
+(gdb) ni
+54		b.eq	shift				// If lsb = 0 skip next step
+1: x/i $pc
+=> 0x400658 <top+4>:	b.eq	0x400660 <shift>  // b.none
+(gdb) ni
+shift () at assign2a.s:58
+58	shift:	asr	W21, W21, 1		// Arithmetic shift right multiplier by 1
+1: x/i $pc
+=> 0x400660 <shift>:	asr	w21, w21, #1
+(gdb) nip /t $w21
+$3 = 1000110
+(gdb) ni
+59		tst	W22, 0x1			// Test if lsb of multiplier is 0 or 1
+1: x/i $pc
+=> 0x400664 <shift+4>:	tst	w22, #0x1
+(gdb) nip /t $w21
+$4 = 100011
+(gdb) ni
+60		b.eq	stmt1				// If lsb of product = 0 skip to stmt1
+1: x/i $pc
+=> 0x400668 <shift+8>:	b.eq	0x400674 <stmt1>  // b.none
+(gdb) ni
+stmt1 () at assign2a.s:64
+64	stmt1:	and	W21, W21, 0x7FFFFFFF	// If lsb of product = 1 then msb is set to 0
+1: x/i $pc
+=> 0x400674 <stmt1>:	and	w21, w21, #0x7fffffff
+(gdb) p /t $w22
+$5 = 0
+(gdb) p /t $w21
+$6 = 100011
+(gdb) ni
+stmt2 () at assign2a.s:65
+65	stmt2:	asr	W22, W22, 1			// Arithmetic shift right product by 1
+1: x/i $pc
+=> 0x400678 <stmt2>:	asr	w22, w22, #1
+(gdb) nip /t $w21
+$7 = 100011
+(gdb) ni
+66		add	W23, W23, 1				// W23 += 1
+1: x/i $pc
+=> 0x40067c <stmt2+4>:	add	w23, w23, #0x1
+(gdb) p $w23
+$8 = 0
+(gdb) ni
+67		cmp	W23, 32				// Compare value of W23 to 32
+1: x/i $pc
+=> 0x400680 <stmt2+8>:	cmp	w23, #0x20
+(gdb) nip $w23
+$9 = 1
+(gdb) ni
+68		b.lt	top				// If W23 < 32 go to top
+1: x/i $pc
+=> 0x400684 <stmt2+12>:	b.lt	0x400654 <top>  // b.tstop
+(gdb) clear top
+Deleted breakpoint 3 
+(gdb) b 70
+Breakpoint 4 at 0x400688: file assign2a.s, line 70.
+(gdb) c
+Continuing.
+
+Breakpoint 4, stmt2 () at assign2a.s:71
+71		cmp	w24, 1				// Check to see if multiplier was negative
+1: x/i $pc
+=> 0x400688 <stmt2+16>:	cmp	w24, #0x1
+(gdb) p $w24
+$10 = 0
+(gdb) p/d (int)$w20
+$11 = -16843010
+(gdb) p/d (int)$w20[C[C[C[C[C[C[C[7P $w24/d (int)$w20[K1
+$12 = -1179010700
+(gdb) p/d (int)$w21[K2
+$13 = -1
+(gdb) p/d (int)$w22[K3
+$14 = 32
+(gdb) b 83
+Breakpoint 5 at 0x4006a8: file assign2a.s, line 83.
+(gdb) c
+Continuing.
+product = 0xffffffff multiplier = 0xb9b9b974
+
+Breakpoint 5, next () at assign2a.s:83
+83		sxtw	x26, W22			// Signed-Extend Word casts int to long int
+1: x/i $pc
+=> 0x4006a8 <next+20>:	sxtw	x26, w22
+(gdb) p /t $w22
+$15 = 11111111111111111111111111111111
+(gdb) p /t $w22[K6
+$16 = 0
+(gdb) ni
+84		and	x26, x26, 0xFFFFFFFF		// Form a bitmask with 0xFFFFFFF
+1: x/i $pc
+=> 0x4006ac <next+24>:	and	x26, x26, #0xffffffff
+(gdb) nip /t $w26
+$17 = 1111111111111111111111111111111111111111111111111111111111111111
+(gdb) ni
+85		lsl	x26, x26, 32			// Shift x26 so it occupies left half of bits
+1: x/i $pc
+=> 0x4006b0 <next+28>:	lsl	x26, x26, #32
+(gdb) nip /t $w26
+$18 = 11111111111111111111111111111111
+(gdb) p /t $w26[C[C[C[C[C[Cni[K
+86		sxtw	x27, W21			// Cast multiplier to 64-bit
+1: x/i $pc
+=> 0x4006b4 <next+32>:	sxtw	x27, w21
+(gdb) nip /t $w26
+$19 = 1111111111111111111111111111111100000000000000000000000000000000
+(gdb) p /t $w21
+$20 = 10111001101110011011100101110100
+(gdb) p /t $w27
+$21 = 0
+(gdb) ni
+87		and	x27, x27, 0xFFFFFFFF		// Bitmask x27 with 0xFFFFFFF
+1: x/i $pc
+=> 0x4006b8 <next+36>:	and	x27, x27, #0xffffffff
+(gdb) ni
+88		add	x25, x26, x27		// Add temp variables to obtain 64-bit x25
+1: x/i $pc
+=> 0x4006bc <next+40>:	add	x25, x26, x27
+(gdb) nip /t $w27
+$22 = 10111001101110011011100101110100
+(gdb) ni[K[Kprint[K[K[K[K /t $x25
+$23 = 0
+(gdb) ni
+91		adrp	x0, str3			// Arg 1: Address of str3
+1: x/i $pc
+=> 0x4006c0 <next+44>:	adrp	x0, 0x400000
+(gdb) nip /t $x25
+$24 = 1111111111111111111111111111111110111001101110011011100101110100
+(gdb) p /x $x25
+$25 = 0xffffffffb9b9b974
+(gdb) p /d $x25
+$26 = -1179010700
+(gdb) c
+Continuing.
+64-bit result = 0xffffffffb9b9b974 (-1179010700)
+[Inferior 1 (process 15492) exited with code 061]
+(gdb) q
+]0;kenneth.sharman@csa2:~/Documents/CPSC_355/A2kenneth.sharman@csa2:~/Documents/CPSC_355/A2$ exit
+exit
+
+Script done on 2018-10-12 02:23:53-06:00
