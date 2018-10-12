@@ -11,16 +11,16 @@ str2:	.string "product = 0x%08x multiplier = 0x%08x\n"
 str3:	.string "64-bit result = 0x%016lx (%ld)\n"
 
 // Define Macros
-define(FALSE, 0)
-define(TRUE, 1)
-define(mcand, W20)	// macros using 32-bit-wide registers
-define(mplier, W21)
-define(prod, W22)
-define(i, W23)
-define(neg, w24)
-define(result, x25)	// macros using 64-bit-wide
-define(tmp1, x26)
-define(tmp2, x27)
+define(FALSE, 0)	// FALSE = 0
+define(TRUE, 1)		// TRUE = 1
+define(mcand, W20)	// Multiplicand
+define(mplier, W21)	// Multiplier
+define(prod, W22)	// Product
+define(i, W23)		// Iteration index
+define(neg, w24)	// Indicates if multiplier is negative
+define(result, x25)	// Result of multiplication
+define(tmp1, x26)	// Temp variable 1 used in result concatenation
+define(tmp2, x27)	// Temp variable 2 used in result concatenation
 
 	.balign 4				// Ensures instructions are properly aligned
 	.global main
@@ -29,10 +29,10 @@ main:	stp	x20, x30, [sp, -16]!		// Saves state
 	mov	x29, sp				// Saves state
 	
 	// Initialize variables
-	mov	mcand, -16843010		// multiplicand = -16843010
-	mov	mplier,	70			// multiplier = 70
-	mov	prod, 0				// product = 0
-	mov	i, 0
+	mov	mcand, -16843010		// Multiplicand = -16843010
+	mov	mplier,	70			// Multiplier = 70
+	mov	prod, 0				// Product = 0
+	mov	i, 0				// Initialize iteration count to zero
 
 	// Print out initial values of variables
 	adrp	x0, str1			// Arg 1: Address of initial string to be printed
@@ -67,28 +67,32 @@ stmt2:	asr	prod, prod, 1			// Arithmetic shift right product by 1
 	cmp	i, 32				// Compare value of i to 32
 	b.lt	top				// If i < 32 go to top
 
+	// Adjust product register if multiplier is negative
 	cmp	neg, 1				// Check to see if multiplier was negative
 	b.lt	next				// If not skip next step
 	sub	prod, prod, mcand		// If it was negative product -= multiplicand
 
-next:	adrp	x0, str2
-	add	x0, x0, :lo12:str2
-	mov	w1, prod
-	mov	w2, mplier
-	bl	printf
+	// Print out product and multiplier
+next:	adrp	x0, str2			// Arg 1: Address of str2
+	add	x0, x0, :lo12:str2		// Takes 2 steps to get address
+	mov	w1, prod			// Arg 2: product
+	mov	w2, mplier			// Arg 3: multiplier
+	bl	printf				// Execute printf
 
-	sxtw	tmp1, prod
-	and tmp1, tmp1, 0xFFFFFFFF
-	lsl	tmp1, tmp1, 32
-	sxtw	tmp2, mplier
-	and	tmp2, tmp2, 0xFFFFFFFF
-	add	result, tmp1, tmp2
+	// Combine product and multiplier together
+	sxtw	tmp1, prod			// Signed-Extend Word casts int to long int
+	and	tmp1, tmp1, 0xFFFFFFFF		// Form a bitmask with 0xFFFFFFF
+	lsl	tmp1, tmp1, 32			// Shift tmp1 so it occupies left half of bits
+	sxtw	tmp2, mplier			// Cast multiplier to 64-bit
+	and	tmp2, tmp2, 0xFFFFFFFF		// Bitmask tmp2 with 0xFFFFFFF
+	add	result, tmp1, tmp2		// Add temp variables to obtain 64-bit result
 
-	adrp	x0, str3
-	add	x0, x0, :lo12:str3
-	mov	x1, result
-	mov	x2, result
-	bl	printf
+	// Print out 64-bit result
+	adrp	x0, str3			// Arg 1: Address of str3
+	add	x0, x0, :lo12:str3		// Takes 2 steps to get address
+	mov	x1, result			// Arg 2: result
+	mov	x2, result			// Arg 3: result
+	bl	printf				// Execute printf
 
 	ldp	x29, x30, [sp], 16		// Restores state
 	ret					// Restores state
