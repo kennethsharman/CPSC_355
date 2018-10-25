@@ -9,29 +9,31 @@
 str1:	.string "v[%d] : %d\n"
 str2:	.string "\nSorted array:\n"
 
-define(i_s, 16)
 define(i_r, w19)
-define(j_s, 20)
 define(j_r, w20)
-define(min_s, 24)
-define(min_r, w21)
-define(temp_s, 28)
-define(temp_r, w22)
-define(v_sr, x25)
-define(v_s, 32)
-define(SIZE, 50)
-define(SCALE, 2)
-define(FP, x29)
-define(SP, x30)
-define(temp1_r, w23)
-define(temp2_r, w24)
+define(temp_r, w21)
+define(v_base_r, x22)
 
-	alloc = -(
+	v_size = 50 * 4						// 200 bytes total allocated for the array
+	local_var_size = 4					// 4 byte local variables; i, j, and temp
+	alloc = -(16 + v_size + 3 * local_var_size) & -16	// Forces address to be evenly divisible
+	dealloc = -alloc 
+	
+	i_s = 16
+	j_s = 20
+	temp_s = 24
 
 	.balign 4
 	.global main
-main:	stp	x29, x30, [sp, -240]!
+main:	stp	x29, x30, [sp, alloc]!
 	mov	x29, sp
 
-	mov	v_sr, v_s			// Load the v_sr register with the offset of the v array
-	
+
+
+
+
+
+
+
+	ldp	x29, x30, [sp], dealloc
+	ret	
