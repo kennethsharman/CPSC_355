@@ -77,7 +77,7 @@ loop2_inner:
 	ldr	j_r, [FP, j_s]					// load index j from stack into index j register
 	add	w23, j_r, -1					// decrement value of index j register by 1
 	ldr	w24, [v_base_r, w23, SXTW SHIFT]		// load register w24 with v[-j]
-	str	w24, [v_base_r, j_r, SXTW SHIFT]		// store v[-j] from w24 on stack in location v[j]
+	str	w24, [v_base_r, j_r, SXTW SHIFT]		// store v[j-1] from w24 on stack in location v[j]
 
 	add	j_r, j_r, -1					// decrement value of index j register
 	str	j_r, [FP, j_s]					// store index j value on stack

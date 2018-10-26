@@ -1,0 +1,589 @@
+Script started on 2018-10-26 01:48:24-06:00
+]0;kenneth.sharman@csa2:~/Documents/CPSC_355/A3kenneth.sharman@csa2:~/Documents/CPSC_355/A3$ gdb assign3
+GNU gdb (GDB) Fedora 8.1.1-3.fc28
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "aarch64-redhat-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from assign3...done.
+(gdb) [H[2J(gdb) l
+1	// CPSC 355:	Tutorial T06
+2	// Assignment:	#3
+3	// Date:	October 25, 2018
+4	// Author:	Kenneth Sharman
+5	// Student ID:	00300185
+6	// Description:	Creates an array with random positive integers, then sorts it using insertion sort
+7	
+8	// Define 2 strings for print statements
+9	str1:	.string "v[%d] : %d\n"
+10	str2:	.string "\nSorted array:\n"
+(gdb) set listsize 20
+(gdb) l
+11	
+12	// Define macros
+13			// index i register
+14			// index j register
+15			// temp variable register
+16			// array v register
+17				// frame pointer register
+18	
+19				// index i offset
+20				// index j offset
+21			// temp variable offset
+22				// array v offset
+23			// size of array v
+24			// used for logical shift left by 2
+25	
+26		v_size = 50 * 4						// 200 bytes total allocated for the array
+27		local_var_size = 4					// 4 byte local variables; i, j, and temp
+28		alloc = -(16 + v_size + 3 * local_var_size) & -16	// forces address to be evenly divisible
+29		dealloc = -alloc 
+30	
+(gdb) l
+31		.balign 4						// ensures instructions are properly aligned
+32		.global main
+33	
+34	main:	stp	x29, x30, [sp, alloc]!				// saves state
+35		mov	x29, sp						// saves state
+36	
+37		add	x22, x29, 28				// add the x29 address plus the array v offset to v register
+38		str	WZR, [x29, 16]					// 16 = 0
+39		ldr	w19, [x29, 16]					// load w19 register with value 16 = 0
+40		b	loop1_check					// check/ enter first loop 
+41	
+42	loop1:	// Initialize array to random positive integers, mod 256
+43	
+44		ldr	w19, [x29, 16]					// load index into index register
+45		
+46		bl	rand						// generate random number
+47		and	w23, w0, 0xFF					// generate random number in range 0-255
+48		str	w23, [x22, w19, SXTW 2]		// store random number in v array register
+49	
+50		adrp	x0, str1					// arg 1: Address of str1
+(gdb) b 37
+Breakpoint 1 at 0x400608: file assign3.s, line 37.
+(gdb) r
+Starting program: /home/ugb/kenneth.sharman/Documents/CPSC_355/A3/assign3 
+warning: the debug information found in "/usr/lib/debug//usr/lib64/ld-2.27.so.debug" does not match "/lib/ld-linux-aarch64.so.1" (CRC mismatch).
+
+Missing separate debuginfos, use: dnf debuginfo-install glibc-2.27-32.fc28.aarch64
+warning: the debug information found in "/usr/lib/debug//lib64/libc-2.27.so.debug" does not match "/lib64/libc.so.6" (CRC mismatch).
+
+warning: the debug information found in "/usr/lib/debug//usr/lib64/libc-2.27.so.debug" does not match "/lib64/libc.so.6" (CRC mismatch).
+
+
+Breakpoint 1, main () at assign3.s:37
+37		add	x22, x29, 28				// add the x29 address plus the array v offset to v register
+(gdb) x/6i main
+   0x400600 <main>:	stp	x29, x30, [sp, #-240]!
+   0x400604 <main+4>:	mov	x29, sp
+=> 0x400608 <main+8>:	add	x22, x29, #0x1c
+   0x40060c <main+12>:	str	wzr, [x29, #16]
+   0x400610 <main+16>:	ldr	w19, [x29, #16]
+   0x400614 <main+20>:	b	0x400644 <loop1_check>
+(gdb) n
+38		str	WZR, [x29, 16]					// 16 = 0
+(gdb) x/d $fp+16
+0xfffffffff050:	1
+(gdb) n
+39		ldr	w19, [x29, 16]					// load w19 register with value 16 = 0
+(gdb) nx/d $fp+16
+0xfffffffff050:	0
+(gdb) p $w19
+$1 = 4196096
+(gdb) n
+40		b	loop1_check					// check/ enter first loop 
+(gdb) np $w19
+$2 = 0
+(gdb) l
+30	
+31		.balign 4						// ensures instructions are properly aligned
+32		.global main
+33	
+34	main:	stp	x29, x30, [sp, alloc]!				// saves state
+35		mov	x29, sp						// saves state
+36	
+37		add	x22, x29, 28				// add the x29 address plus the array v offset to v register
+38		str	WZR, [x29, 16]					// 16 = 0
+39		ldr	w19, [x29, 16]					// load w19 register with value 16 = 0
+40		b	loop1_check					// check/ enter first loop 
+41	
+42	loop1:	// Initialize array to random positive integers, mod 256
+43	
+44		ldr	w19, [x29, 16]					// load index into index register
+45		
+46		bl	rand						// generate random number
+47		and	w23, w0, 0xFF					// generate random number in range 0-255
+48		str	w23, [x22, w19, SXTW 2]		// store random number in v array register
+49	
+(gdb) l
+50		adrp	x0, str1					// arg 1: Address of str1
+51		add	x0, x0, :lo12:str1				// takes 2 steps to get address
+52		mov	w1, w19						// arg 2: index
+53		ldr	w2, [x22, w19, SXTW 2]			// arg 3: random number assigned to v[index]
+54		bl	printf						// execute printf
+55	
+56		add	w19, w19, 1					// increment index by 1
+57		str	w19, [x29, 16]					// store index value on stack
+58	
+59	loop1_check:	
+60		cmp	w19, 50					// if i < 50 :
+61		b.lt	loop1						// go to top of loop1
+62	
+63		mov	w19, 1						// set index i register to 1
+64		str	w19, [x29, 16]					// store index i value on stack
+65		b	loop2_outerTest					// check/ enter second loop
+66	
+67	loop2: // Sort the array using an insertion sort
+68	
+69		ldr	w19, [x29, 16]					// load index i value on stack to index i register
+(gdb) b loop1_check
+Breakpoint 2 at 0x400644: file assign3.s, line 60.
+(gdb) c
+Continuing.
+
+Breakpoint 2, loop1_check () at assign3.s:60
+60		cmp	w19, 50					// if i < 50 :
+(gdb) n
+61		b.lt	loop1						// go to top of loop1
+(gdb) n
+loop1 () at assign3.s:44
+44		ldr	w19, [x29, 16]					// load index into index register
+(gdb) p $w19
+$3 = 0
+(gdb) x/d $fp+16
+0xfffffffff050:	0
+(gdb) n
+46		bl	rand						// generate random number
+(gdb) n
+47		and	w23, w0, 0xFF					// generate random number in range 0-255
+(gdb) p $w23
+$4 = 0
+(gdb) p $w23n[K
+48		str	w23, [x22, w19, SXTW 2]		// store random number in v array register
+(gdb) np $w23
+$5 = 103
+(gdb) x/d $fp+28
+0xfffffffff05c:	0
+(gdb) n
+50		adrp	x0, str1					// arg 1: Address of str1
+(gdb) nx/d $fp+28
+0xfffffffff05c:	103
+(gdb) c
+Continuing.
+v[0] : 103
+
+Breakpoint 2, loop1_check () at assign3.s:60
+60		cmp	w19, 50					// if i < 50 :
+(gdb) p $w19
+$6 = 1
+(gdb) x/d $fp+16
+0xfffffffff050:	1
+(gdb) n
+61		b.lt	loop1						// go to top of loop1
+(gdb) n
+loop1 () at assign3.s:44
+44		ldr	w19, [x29, 16]					// load index into index register
+(gdb) n
+46		bl	rand						// generate random number
+(gdb) n
+47		and	w23, w0, 0xFF					// generate random number in range 0-255
+(gdb) n
+48		str	w23, [x22, w19, SXTW 2]		// store random number in v array register
+(gdb) p $w23
+$7 = 198
+(gdb) n
+50		adrp	x0, str1					// arg 1: Address of str1
+(gdb) x/d $fp+28
+0xfffffffff05c:	103
+(gdb) x/d $fp+28[K[K32
+0xfffffffff060:	198
+(gdb) delete
+Delete all breakpoints? (y or n) y
+(gdb) l
+40		b	loop1_check					// check/ enter first loop 
+41	
+42	loop1:	// Initialize array to random positive integers, mod 256
+43	
+44		ldr	w19, [x29, 16]					// load index into index register
+45		
+46		bl	rand						// generate random number
+47		and	w23, w0, 0xFF					// generate random number in range 0-255
+48		str	w23, [x22, w19, SXTW 2]		// store random number in v array register
+49	
+50		adrp	x0, str1					// arg 1: Address of str1
+51		add	x0, x0, :lo12:str1				// takes 2 steps to get address
+52		mov	w1, w19						// arg 2: index
+53		ldr	w2, [x22, w19, SXTW 2]			// arg 3: random number assigned to v[index]
+54		bl	printf						// execute printf
+55	
+56		add	w19, w19, 1					// increment index by 1
+57		str	w19, [x29, 16]					// store index value on stack
+58	
+59	loop1_check:	
+(gdb) l
+60		cmp	w19, 50					// if i < 50 :
+61		b.lt	loop1						// go to top of loop1
+62	
+63		mov	w19, 1						// set index i register to 1
+64		str	w19, [x29, 16]					// store index i value on stack
+65		b	loop2_outerTest					// check/ enter second loop
+66	
+67	loop2: // Sort the array using an insertion sort
+68	
+69		ldr	w19, [x29, 16]					// load index i value on stack to index i register
+70		mov	w20, w19					// copy index i to index j
+71		str	w20, [x29, 20]					// store index j on stack
+72		ldr	w21,	[x22, w19, SXTW 2]		// w21 = v[index i]
+73	
+74		b	loop2_innerTest					// check/ enter inner loop
+75	
+76	loop2_inner:
+77		ldr	w20, [x29, 20]					// load index j from stack into index j register
+78		add	w23, w20, -1					// decrement value of index j register by 1
+79		ldr	w24, [x22, w23, SXTW 2]		// load register w24 with v[-j]
+(gdb) b loop2
+Breakpoint 3 at 0x400658: file assign3.s, line 69.
+(gdb) c
+Continuing.
+v[1] : 198
+v[2] : 105
+v[3] : 115
+v[4] : 81
+v[5] : 255
+v[6] : 74
+v[7] : 236
+v[8] : 41
+v[9] : 205
+v[10] : 186
+v[11] : 171
+v[12] : 242
+v[13] : 251
+v[14] : 227
+v[15] : 70
+v[16] : 124
+v[17] : 194
+v[18] : 84
+v[19] : 248
+v[20] : 27
+v[21] : 232
+v[22] : 231
+v[23] : 141
+v[24] : 118
+v[25] : 90
+v[26] : 46
+v[27] : 99
+v[28] : 51
+v[29] : 159
+v[30] : 201
+v[31] : 154
+v[32] : 102
+v[33] : 50
+v[34] : 13
+v[35] : 183
+v[36] : 49
+v[37] : 88
+v[38] : 163
+v[39] : 90
+v[40] : 37
+v[41] : 93
+v[42] : 5
+v[43] : 23
+v[44] : 88
+v[45] : 233
+v[46] : 94
+v[47] : 212
+v[48] : 171
+v[49] : 178
+
+Breakpoint 3, loop2 () at assign3.s:69
+69		ldr	w19, [x29, 16]					// load index i value on stack to index i register
+(gdb) x/50d $fp+28
+0xfffffffff05c:	103	198	105	115
+0xfffffffff06c:	81	255	74	236
+0xfffffffff07c:	41	205	186	171
+0xfffffffff08c:	242	251	227	70
+0xfffffffff09c:	124	194	84	248
+0xfffffffff0ac:	27	232	231	141
+0xfffffffff0bc:	118	90	46	99
+0xfffffffff0cc:	51	159	201	154
+0xfffffffff0dc:	102	50	13	183
+0xfffffffff0ec:	49	88	163	90
+0xfffffffff0fc:	37	93	5	23
+0xfffffffff10c:	88	233	94	212
+0xfffffffff11c:	171	178
+(gdb) 
+0xfffffffff124:	0
+(gdb) n
+70		mov	w20, w19					// copy index i to index j
+(gdb) p $20[K[Kw20
+$8 = 0
+(gdb) n
+71		str	w20, [x29, 20]					// store index j on stack
+(gdb) np $w20
+$9 = 1
+(gdb) n
+72		ldr	w21,	[x22, w19, SXTW 2]		// w21 = v[index i]
+(gdb) x/d $fp+20
+0xfffffffff054:	1
+(gdb) n
+74		b	loop2_innerTest					// check/ enter inner loop
+(gdb) p $w21
+$10 = 198
+(gdb) l
+64		str	w19, [x29, 16]					// store index i value on stack
+65		b	loop2_outerTest					// check/ enter second loop
+66	
+67	loop2: // Sort the array using an insertion sort
+68	
+69		ldr	w19, [x29, 16]					// load index i value on stack to index i register
+70		mov	w20, w19					// copy index i to index j
+71		str	w20, [x29, 20]					// store index j on stack
+72		ldr	w21,	[x22, w19, SXTW 2]		// w21 = v[index i]
+73	
+74		b	loop2_innerTest					// check/ enter inner loop
+75	
+76	loop2_inner:
+77		ldr	w20, [x29, 20]					// load index j from stack into index j register
+78		add	w23, w20, -1					// decrement value of index j register by 1
+79		ldr	w24, [x22, w23, SXTW 2]		// load register w24 with v[-j]
+80		str	w24, [x22, w20, SXTW 2]		// store v[j-1] from w24 on stack in location v[j]
+81	
+82		add	w20, w20, -1					// decrement value of index j register
+83		str	w20, [x29, 20]					// store index j value on stack
+(gdb) l
+84	
+85	loop2_innerTest:
+86		ldr	w20, [x29, 20]					// load index j from stack into register
+87		cmp	w20, WZR					// compare index j register to zero
+88		b.le	break_inner					// if j < 0 then break from inner loop
+89	
+90		add	w23, w20, -1					// if j !< 0 then place j-1 in w23
+91		ldr	w24, [x22, w23, SXTW 2]		// load v[j-1] value into w24
+92		
+93		cmp	w21, w24					// compare w21 = v[i] and w24 = v[j-1]
+94		b.ge	break_inner					// if v[i] >= v[j-1]
+95		b	loop2_inner 					// break inner loop
+96	
+97	break_inner:
+98		str	w21, [x22, w20, SXTW 2]		// update v[j] = w21 = v[i]
+99		add	w19, w19, 1					// increment index i register by 1
+100		str	w19, [x29, 16]					// store index i value on stack
+101	
+102	loop2_outerTest:	
+103		cmp	w19, 50					// compre index i register with size
+(gdb) b loop2_innerTest
+Breakpoint 4 at 0x400684: file assign3.s, line 86.
+(gdb) c
+Continuing.
+
+Breakpoint 4, loop2_innerTest () at assign3.s:86
+86		ldr	w20, [x29, 20]					// load index j from stack into register
+(gdb) n
+87		cmp	w20, WZR					// compare index j register to zero
+(gdb) p$w20[K[K[K[K $w20
+$11 = 1
+(gdb) n
+88		b.le	break_inner					// if j < 0 then break from inner loop
+(gdb) n
+90		add	w23, w20, -1					// if j !< 0 then place j-1 in w23
+(gdb) n
+91		ldr	w24, [x22, w23, SXTW 2]		// load v[j-1] value into w24
+(gdb) n
+93		cmp	w21, w24					// compare w21 = v[i] and w24 = v[j-1]
+(gdb) p $w21
+$12 = 198
+(gdb) p $w24
+$13 = 103
+(gdb) n
+94		b.ge	break_inner					// if v[i] >= v[j-1]
+(gdb) n
+break_inner () at assign3.s:98
+98		str	w21, [x22, w20, SXTW 2]		// update v[j] = w21 = v[i]
+(gdb) p $w20
+$14 = 1
+(gdb) x/d $fp+32
+0xfffffffff060:	198
+(gdb) n
+99		add	w19, w19, 1					// increment index i register by 1
+(gdb) nx/d $fp+32
+0xfffffffff060:	198
+(gdb) c
+Continuing.
+
+Breakpoint 3, loop2 () at assign3.s:69
+69		ldr	w19, [x29, 16]					// load index i value on stack to index i register
+(gdb) c
+Continuing.
+
+Breakpoint 4, loop2_innerTest () at assign3.s:86
+86		ldr	w20, [x29, 20]					// load index j from stack into register
+(gdb) p $w20
+$15 = 2
+(gdb) n
+87		cmp	w20, WZR					// compare index j register to zero
+(gdb) np $w20
+$16 = 2
+(gdb) n
+88		b.le	break_inner					// if j < 0 then break from inner loop
+(gdb) n
+90		add	w23, w20, -1					// if j !< 0 then place j-1 in w23
+(gdb) n
+91		ldr	w24, [x22, w23, SXTW 2]		// load v[j-1] value into w24
+(gdb) p $w23
+$17 = 1
+(gdb) n
+93		cmp	w21, w24					// compare w21 = v[i] and w24 = v[j-1]
+(gdb) p $w21
+$18 = 105
+(gdb) p $w24
+$19 = 198
+(gdb) n
+94		b.ge	break_inner					// if v[i] >= v[j-1]
+(gdb) n
+95		b	loop2_inner 					// break inner loop
+(gdb) n
+loop2_inner () at assign3.s:77
+77		ldr	w20, [x29, 20]					// load index j from stack into index j register
+(gdb) x/d $fp+20
+0xfffffffff054:	2
+(gdb) n
+78		add	w23, w20, -1					// decrement value of index j register by 1
+(gdb) p $w20
+$20 = 2
+(gdb) n
+79		ldr	w24, [x22, w23, SXTW 2]		// load register w24 with v[-j]
+(gdb) p$w23[K[K[K[K $w23
+$21 = 1
+(gdb) x/d $fp+32
+0xfffffffff060:	198
+(gdb) n
+80		str	w24, [x22, w20, SXTW 2]		// store v[j-1] from w24 on stack in location v[j]
+(gdb) n
+82		add	w20, w20, -1					// decrement value of index j register
+(gdb) n
+83		str	w20, [x29, 20]					// store index j value on stack
+(gdb) n
+
+Breakpoint 4, loop2_innerTest () at assign3.s:86
+86		ldr	w20, [x29, 20]					// load index j from stack into register
+(gdb) n
+87		cmp	w20, WZR					// compare index j register to zero
+(gdb) n
+88		b.le	break_inner					// if j < 0 then break from inner loop
+(gdb) n
+90		add	w23, w20, -1					// if j !< 0 then place j-1 in w23
+(gdb) n
+91		ldr	w24, [x22, w23, SXTW 2]		// load v[j-1] value into w24
+(gdb) p $w24
+$22 = 198
+(gdb) n
+93		cmp	w21, w24					// compare w21 = v[i] and w24 = v[j-1]
+(gdb) np $w24
+$23 = 103
+(gdb) n
+94		b.ge	break_inner					// if v[i] >= v[j-1]
+(gdb) n
+break_inner () at assign3.s:98
+98		str	w21, [x22, w20, SXTW 2]		// update v[j] = w21 = v[i]
+(gdb) p $w21
+$24 = 105
+(gdb) p $w20
+$25 = 1
+(gdb) x/d $fp+32
+0xfffffffff060:	198
+(gdb) n
+99		add	w19, w19, 1					// increment index i register by 1
+(gdb) nx/d $fp+32
+0xfffffffff060:	105
+(gdb) l
+89	
+90		add	w23, w20, -1					// if j !< 0 then place j-1 in w23
+91		ldr	w24, [x22, w23, SXTW 2]		// load v[j-1] value into w24
+92		
+93		cmp	w21, w24					// compare w21 = v[i] and w24 = v[j-1]
+94		b.ge	break_inner					// if v[i] >= v[j-1]
+95		b	loop2_inner 					// break inner loop
+96	
+97	break_inner:
+98		str	w21, [x22, w20, SXTW 2]		// update v[j] = w21 = v[i]
+99		add	w19, w19, 1					// increment index i register by 1
+100		str	w19, [x29, 16]					// store index i value on stack
+101	
+102	loop2_outerTest:	
+103		cmp	w19, 50					// compre index i register with size
+104		b.lt	loop2						// if i < 50 then go to top of loop2
+105	
+106	// Print "Sorted array:"
+107		adrp	x0, str2					// arg 1: address of initial string to be printed
+108		add	x0, x0, :lo12:str2				// takes two steps to get address
+(gdb) l
+109		bl	printf						// execute printf
+110	
+111	// Print each element of array v
+112		str	WZR, [x29, 16]					// reset index i to zero on stack
+113		ldr	w19, [x29, 16]					// update index i register
+114		b	print_check					
+115	
+116	final_loop:
+117		adrp	x0, str1					// arg 1: address of string to be printed
+118		add	x0, x0, :lo12:str1				// takes two steps to get address
+119		mov	w1, w19						// arg 2: index i
+120		ldr	w2, [x22, w19, SXTW 2]			// arg 3: v[index i]
+121		bl	printf						// execute printf
+122	
+123		add	w19, w19, 1					// increment index i register by 1
+124		str	w19, [x29, 16]					// update index i value on stack
+125	
+126	print_check:
+127		cmp	w19, 50					// compare index i register to 50
+128		b.lt	final_loop					// if w19 < 50 then print next element
+(gdb) b 105
+Breakpoint 5 at 0x4006b8: file assign3.s, line 105.
+(gdb) c
+Continuing.
+
+Breakpoint 3, loop2 () at assign3.s:69
+69		ldr	w19, [x29, 16]					// load index i value on stack to index i register
+(gdb) delt[Kete
+Delete all breakpoints? (y or n) y
+(gdb) b 105
+Breakpoint 6 at 0x4006b8: file assign3.s, line 105.
+(gdb) c
+Continuing.
+
+Breakpoint 6, loop2_outerTest () at assign3.s:107
+107		adrp	x0, str2					// arg 1: address of initial string to be printed
+(gdb) x/50d $fp+28
+0xfffffffff05c:	5	13	23	27
+0xfffffffff06c:	37	41	46	49
+0xfffffffff07c:	50	51	70	74
+0xfffffffff08c:	81	84	88	88
+0xfffffffff09c:	90	90	93	94
+0xfffffffff0ac:	99	102	103	105
+0xfffffffff0bc:	115	118	124	141
+0xfffffffff0cc:	154	159	163	171
+0xfffffffff0dc:	171	178	183	186
+0xfffffffff0ec:	194	198	201	205
+0xfffffffff0fc:	212	227	231	232
+0xfffffffff10c:	233	236	242	248
+0xfffffffff11c:	251	255
+(gdb) q
+A debugging session is active.
+
+	Inferior 1 [process 16901] will be killed.
+
+Quit anyway? (y or n) y
+]0;kenneth.sharman@csa2:~/Documents/CPSC_355/A3kenneth.sharman@csa2:~/Documents/CPSC_355/A3$ exit
+exit
+
+Script done on 2018-10-26 02:00:01-06:00
