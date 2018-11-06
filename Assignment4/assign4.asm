@@ -49,11 +49,20 @@ newBox:	stp	x29, x30, [sp, alloc_box]!		// saves state
 	str	w10, [x9, box_area]			// b.area = b.size.width * b.size.height
 
 	// set return variables
-	ldr	w0, [x9, box_origin + point_x]		// w0 = b.origin.x = 0
-	ldr	w1, [x9, box_origin + point_y]		// w1 = b.origin.y = 0
-	ldr	w2, [x9, box_size + dim_width]		// w2 = b.size.width = 1
-	ldr	w3, [x9, box_size + dim_height]		// w3 = b.size.height = 1
-	ldr	w4, [x9, box_area]			// w4 = b.area = 1
+	ldr	w10, [x9, box_origin + point_x]		// w10 = b.origin.x
+	str	w10, [x8, box_origin + point_x]		// set b.origin.x for return
+
+	ldr	w10, [x9, box_origin + point_y]		// w10 = b.origin.y
+	str	w10, [x8, box_origin + point_y]		// set b.origin.x for return
+
+	ldr	w10, [x9, box_size + dim_width]		// w10 = b.size.width
+	str	w10, [x8, box_size + dim_width]		// set b.size.width for return
+
+	ldr	w10, [x9, box_size + dim_height]	// w10 = b.size.height
+	str	w10, [x8, box_size + dim_height]	// set b.size.height for return
+
+	ldr	w10, [x9, box_area]			// w10 = b.area
+	str	w10, [x8, box_area]			// set b.area for return
 
 	ldp	x29, x30, [sp], dealloc_box		// restores state
 	ret						// transfers control to address stored in LR
@@ -161,7 +170,7 @@ break:	ldr	x0, [x29, return_s]			// Load/ return result value
 	ret						// returns control to address in LP
 
 // define equates used in main
-	alloc_main = -(16 + (2*b_size)+ 16) & -16	// allocate memory: 2 box structs, 2 registers
+	alloc_main = -(16 + (2*b_size)) & -16		// allocate memory: 2 box structs
 	dealloc_main = -alloc_main			// define dealloc
 	first_s = 16					// first box offset
 	second_s = first_s + b_size			// second box offset
@@ -170,22 +179,11 @@ break:	ldr	x0, [x29, return_s]			// Load/ return result value
 main:	stp	x29, x30, [sp, alloc_main]!		// saves state
 	mov	x29, sp					// saves state
 
-	add	x19, x29, first_s			// x19 = first_base_r
-	add	x20, x29, second_s			// x20 = second_base_r
-
+	add	x8, x29, first_s			// put address of first into x8
 	bl	newBox					// execute newBox subroutine
-	str	w0, [x19, box_origin + point_x]		// Store b1.origin.x on stack
-	str	w1, [x19, box_origin + point_y]		// Store b1.origin.y
-	str	w2, [x19, box_size + dim_width]		// Store b1.size.width
-	str	w3, [x19, box_size + dim_height]	// Store b1.size.height
-	str	w4, [x19, box_area]			// Store b1.area
 
+	add	x8, x29, second_s			// put address of second into x8
 	bl	newBox					// execute newBox subroutine
-	str	w0, [x20, box_origin + point_x]		// Store b2.origin.x on stack
-	str	w1, [x20, box_origin + point_y]		// Store b2.origin.y
-	str	w2, [x20, box_size + dim_width]		// Store b2.size.width
-	str	w3, [x20, box_size + dim_height]	// Store b2.size.height
-	str	w4, [x20, box_area]			// Stor b2.area on stack
 
 	// print header 1 string
 	adrp	x0, str2				// arg 1: address of str2
@@ -203,7 +201,7 @@ main:	stp	x29, x30, [sp, alloc_main]!		// saves state
 	add	x0, x29, first_s			// arg 1: first pointer
 	add	x1, x29, second_s			// arg 2: second pointer
 	bl	equal					// execute equal subroutine
-	cbz	x0, nequal
+	cbz	x0, nequal				// compare and branch if zero
 	// if equal: execute move on first
 	add	x0, x29, first_s			// arg 1: first pointer
 	mov	w1, -5					// arg 2: deltaX = -5
@@ -229,3 +227,4 @@ nequal:	// print header 2 string
 
 	ldp	x29, x30, [sp], dealloc_main		// restores state
 	ret						// restores state
+

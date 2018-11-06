@@ -1,0 +1,629 @@
+Script started on 2018-11-05 20:26:30-07:00
+]0;kenneth.sharman@csa2:~/Documents/CPSC_355/A4kenneth.sharman@csa2:~/Documents/CPSC_355/A4$ gdb assign4
+GNU gdb (GDB) Fedora 8.1.1-3.fc28
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "aarch64-redhat-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from assign4...done.
+(gdb) [H[2J(gdb) setliset[K[K[K[K[K listsize 25
+(gdb) l
+1	// CPSC 355:	Tutorial T06
+2	// Assignment:	#4
+3	// Date:	Nov 9, 2018
+4	// Description:	Implements and manipulates a box structure and displays results
+5	
+6	// define strings for print statements
+7	str1:	.string "Box %s origin = (%d, %d) width = %d height = %d area = %d\n"	// box values
+8	str2:	.string "Initial box values:\n" 	// header 1
+9	str3:	.string "\nChanged box values:\n" 	// header 2
+10	first:	.string "first" 			// first box name
+11	second:	.string "second"			// second box name
+12	
+13		FALSE = 0	// assembler equates
+14		TRUE = 1
+15	
+16	// Define equates used in newBox subroutine
+17		box_origin = 0	// box struct offsets
+18		box_size = 8
+19		box_area = 16
+20	
+21		point_x = 0	// box struct nested Offsets
+22		point_y = 4
+23		dim_width = 0
+24		dim_height = 4
+25	
+(gdb) l
+26		b_size = 20					// 20 bytes needed for box struct
+27		alloc_box = -(16 + b_size) & -16		// quadword align stack allocation
+28		dealloc_box = -alloc_box			// define dealloc
+29		b_s = 16					// box b stack offset
+30	
+31		.balign 4					// ensures instructions are properly aligned
+32	
+33	// newBox subroutine creates new box struct and initializes its values
+34	newBox:	stp	x29, x30, [sp, alloc_box]!		// saves state
+35		mov	x29, sp					// saves state
+36	
+37		add	x9, x29, b_s				// calculate b struct base address 
+38		mov	w10, 1					// w10 = 1, used to store value of 1	
+39		
+40		// assign values to the fields of box b
+41		str	wzr, [x9, box_origin + point_x]		// b.origin.x = 0
+42		str	wzr, [x9, box_origin + point_y]		// b.origin.y = 0
+43		str	w10, [x9, box_size + dim_width]		// b.size.width = 1
+44		str	w10, [x9, box_size + dim_height]	// b.size.height = 1
+45	
+46		ldr	w10, [x9, box_size + dim_width]		// w10 = b.size.width
+47		ldr	w11, [x9, box_size + dim_height]	// w11 = b.size.height
+48		mul	w10, w10, w11				// w10 = width * height
+49		str	w10, [x9, box_area]			// b.area = b.size.width * b.size.height
+50	
+(gdb) b 41
+Breakpoint 1 at 0x40061c: file assign4.s, line 41.
+(gdb) r
+Starting program: /home/ugb/kenneth.sharman/Documents/CPSC_355/A4/assign4 
+warning: the debug information found in "/usr/lib/debug//usr/lib64/ld-2.27.so.debug" does not match "/lib/ld-linux-aarch64.so.1" (CRC mismatch).
+
+Missing separate debuginfos, use: dnf debuginfo-install glibc-2.27-32.fc28.aarch64
+warning: the debug information found in "/usr/lib/debug//lib64/libc-2.27.so.debug" does not match "/lib64/libc.so.6" (CRC mismatch).
+
+warning: the debug information found in "/usr/lib/debug//usr/lib64/libc-2.27.so.debug" does not match "/lib64/libc.so.6" (CRC mismatch).
+
+
+Breakpoint 1, newBox () at assign4.s:41
+41		str	wzr, [x9, box_origin + point_x]		// b.origin.x = 0
+(gdb) x/d $fp+16
+0xfffffffff0e0:	-3840
+(gdb) n
+42		str	wzr, [x9, box_origin + point_y]		// b.origin.y = 0
+(gdb) nx/d $fp+16
+0xfffffffff0e0:	0
+(gdb) x/d $fp+16[K[K20
+0xfffffffff0e4:	65535
+(gdb) n
+43		str	w10, [x9, box_size + dim_width]		// b.size.width = 1
+(gdb) nx/d $fp+20
+0xfffffffff0e4:	0
+(gdb) x/d $fp+20[K4
+0xfffffffff0e8:	-1084812248
+(gdb) n
+44		str	w10, [x9, box_size + dim_height]	// b.size.height = 1
+(gdb) nx/d $fp+24
+0xfffffffff0e8:	1
+(gdb) x/d $fp+24[K8
+0xfffffffff0ec:	65535
+(gdb) n
+46		ldr	w10, [x9, box_size + dim_width]		// w10 = b.size.width
+(gdb) nx/d $fp+28
+0xfffffffff0ec:	1
+(gdb) n
+47		ldr	w11, [x9, box_size + dim_height]	// w11 = b.size.height
+(gdb) n
+48		mul	w10, w10, w11				// w10 = width * height
+(gdb) p $w10
+$1 = 1
+(gdb) p $w11
+$2 = 1
+(gdb) n
+49		str	w10, [x9, box_area]			// b.area = b.size.width * b.size.height
+(gdb) n
+52		ldr	w10, [x9, box_origin + point_x]		// w10 = b.origin.x
+(gdb) p $w10
+$3 = 1
+(gdb) x/d $fp+32
+0xfffffffff0f0:	1
+(gdb) l
+40		// assign values to the fields of box b
+41		str	wzr, [x9, box_origin + point_x]		// b.origin.x = 0
+42		str	wzr, [x9, box_origin + point_y]		// b.origin.y = 0
+43		str	w10, [x9, box_size + dim_width]		// b.size.width = 1
+44		str	w10, [x9, box_size + dim_height]	// b.size.height = 1
+45	
+46		ldr	w10, [x9, box_size + dim_width]		// w10 = b.size.width
+47		ldr	w11, [x9, box_size + dim_height]	// w11 = b.size.height
+48		mul	w10, w10, w11				// w10 = width * height
+49		str	w10, [x9, box_area]			// b.area = b.size.width * b.size.height
+50	
+51		// set return variables
+52		ldr	w10, [x9, box_origin + point_x]		// w10 = b.origin.x
+53		str	w10, [x8, box_origin + point_x]		// set b.origin.x for return
+54	
+55		ldr	w10, [x9, box_origin + point_y]		// w10 = b.origin.y
+56		str	w10, [x8, box_origin + point_y]		// set b.origin.x for return
+57	
+58		ldr	w10, [x9, box_size + dim_width]		// w10 = b.size.width
+59		str	w10, [x8, box_size + dim_width]		// set b.size.width for return
+60	
+61		ldr	w10, [x9, box_size + dim_height]	// w10 = b.size.height
+62		str	w10, [x8, box_size + dim_height]	// set b.size.height for return
+63	
+64		ldr	w10, [x9, box_area]			// w10 = b.area
+(gdb) l
+65		str	w10, [x8, box_area]			// set b.area for return
+66	
+67		ldp	x29, x30, [sp], dealloc_box		// restores state
+68		ret						// transfers control to address stored in LR
+69	
+70	// move subroutine changes the origin location of box struct
+71	move:	stp	x29, x30, [sp, -16]!			// saves state
+72		mov	x29, sp					// save state
+73		// load box origin data into temp registers
+74		ldr	w9, [x0, box_origin + point_x]		// w9 = b.origin.x
+75		ldr	w10, [x0, box_origin + point_y]		// w10 = b.origin.y
+76		// shift box origin values
+77		add	w9, w9, w1				// w9 += w1 (deltaX)
+78		add	w10, w10, w2				// w10 += w2 (deltaY)
+79		// update values on stack
+80		str	w9, [x0, box_origin + point_x]		// b.origin.x += deltaX
+81		str	w10, [x0, box_origin + point_y]		// b.origin.y += deltaY
+82	
+83		ldp	x29, x30, [sp], 16			// restores state
+84		ret						// transfers control to address in LR
+85	
+86	// expand subroutine scales the dimensions of box struct
+87	expand:	stp	x29, x30, [sp, -16]!			// saves state
+88		mov	x29, sp					// saves state
+89		// load box size data
+(gdb) n
+53		str	w10, [x8, box_origin + point_x]		// set b.origin.x for return
+(gdb) n
+55		ldr	w10, [x9, box_origin + point_y]		// w10 = b.origin.y
+(gdb) p $w10
+$4 = 0
+(gdb) x/d $fp+16
+0xfffffffff0e0:	0
+(gdb) n
+56		str	w10, [x8, box_origin + point_y]		// set b.origin.x for return
+(gdb) n
+58		ldr	w10, [x9, box_size + dim_width]		// w10 = b.size.width
+(gdb) nx/d $fp+16[C[C[C[C[C[C[4Pp $w10
+$5 = 0
+(gdb) p $w10n[Kx/d $fp+16[K[K20
+0xfffffffff0e4:	0
+(gdb) n
+59		str	w10, [x8, box_size + dim_width]		// set b.size.width for return
+(gdb) n
+61		ldr	w10, [x9, box_size + dim_height]	// w10 = b.size.height
+(gdb) nx/d $fp+20[C[C[C[C[C[C[4Pp $w10
+$6 = 1
+(gdb) p $w10n[Kx/d $fp+20[K4
+0xfffffffff0e8:	1
+(gdb) n
+62		str	w10, [x8, box_size + dim_height]	// set b.size.height for return
+(gdb) n
+64		ldr	w10, [x9, box_area]			// w10 = b.area
+(gdb) nx/d $fp+24[C[C[C[C[C[C[4Pp $w10
+$7 = 1
+(gdb) p $w10n[Kx/d $fp+24[K8
+0xfffffffff0ec:	1
+(gdb) n
+65		str	w10, [x8, box_area]			// set b.area for return
+(gdb) n
+67		ldp	x29, x30, [sp], dealloc_box		// restores state
+(gdb) nx/d $fp+28[C[C[C[C[C[C[4Pp $w10
+$8 = 1
+(gdb) p $w10n[Kx/d $fp+28[K[K32
+0xfffffffff0f0:	1
+(gdb) finish
+Run till exit from #0  newBox () at assign4.s:67
+main () at assign4.s:185
+185		add	x8, x29, second_s			// put address of second into x8
+(gdb) x/5d $fp+16
+0xfffffffff110:	0	0	1	1
+0xfffffffff120:	1
+(gdb) c
+Continuing.
+
+Breakpoint 1, newBox () at assign4.s:41
+41		str	wzr, [x9, box_origin + point_x]		// b.origin.x = 0
+(gdb) finish
+Run till exit from #0  newBox () at assign4.s:41
+main () at assign4.s:189
+189		adrp	x0, str2				// arg 1: address of str2
+(gdb) finishc[Kx/5d $fp+16[K[K36
+0xfffffffff124:	0	0	1	1
+0xfffffffff134:	1
+(gdb) l
+177	
+178		.global main
+179	main:	stp	x29, x30, [sp, alloc_main]!		// saves state
+180		mov	x29, sp					// saves state
+181	
+182		add	x8, x29, first_s			// put address of first into x8
+183		bl	newBox					// execute newBox subroutine
+184	
+185		add	x8, x29, second_s			// put address of second into x8
+186		bl	newBox					// execute newBox subroutine
+187	
+188		// print header 1 string
+189		adrp	x0, str2				// arg 1: address of str2
+190		add	x0, x0, :lo12:str2			// takes two steps to get address
+191		bl printf					// execute printf
+192		// print values of first box
+193		ldr	x0, =first				// arg 1: first string
+194		add	x1, x29, first_s			// arg 2: first pointer
+195		bl	printBox				// execute printBox
+196		// print values of second box
+197		ldr	x0, =second				// arg 1: second string
+198		add	x1, x29, second_s			// arg 2: second pointer
+199		bl	printBox				// execute printBox
+200		// compare values in first and second
+201		add	x0, x29, first_s			// arg 1: first pointer
+(gdb) l
+202		add	x1, x29, second_s			// arg 2: second pointer
+203		bl	equal					// execute equal subroutine
+204		cbz	x0, nequal
+205		// if equal: execute move on first
+206		add	x0, x29, first_s			// arg 1: first pointer
+207		mov	w1, -5					// arg 2: deltaX = -5
+208		mov	w2, 7					// arg 3: deltaY = 7
+209		bl	move					// execute move subroutine on first
+210		// execute expand on second
+211		add	x0, x29, second_s			// x0 = second pointer
+212		mov	w1, 3					// w1 = factor = 3
+213		bl	expand					// execute expand subroutine on second
+214	
+215	nequal:	// print header 2 string
+216		adrp	x0, str3				// arg 1: Changed Value string
+217		add	x0, x0, :lo12:str3			// takes two steps to get address
+218		bl	printf					// execute printf
+219		// print values of first box
+220		ldr	x0, =first				// arg 1: first string
+221		add	x1, x29, first_s			// arg 2: first pointer
+222		bl	printBox				// execute printBox
+223		// print values of second box
+224		ldr	x0, =second				// arg 1: second string
+225		add	x1, x29, second_s			// arg 2: second pointer
+226		bl	printBox				// execute printBox
+(gdb) b equal
+Breakpoint 2 at 0x4006fc: file assign4.s, line 133.
+(gdb) c
+Continuing.
+Initial box values:
+Box first origin = (0, 0) width = 1 height = 1 area = 1
+Box second origin = (0, 0) width = 1 height = 1 area = 1
+
+Breakpoint 2, equal () at assign4.s:133
+133	equal:	stp	x29, x30, [sp, alloc_equal]!		// saves state
+(gdb) l
+121	
+122		ldp	x29, x30, [sp], 16			// restores state
+123		ret						// transfers control to address in LR
+124	
+125	// define equates used in equal subroutine
+126		return_size = 4					// int result requires 4 bytes memory
+127		alloc_equal = -(16 + return_size) & -16		// quadword align stack allocation
+128		dealloc_equal = -alloc_equal			// define dealloc
+129		return_s = 16
+130	
+131	// equal subroutine verifies that the values of two box structs are equal and returns TRUE
+132	// if they are not equal the subroutine returns FALSE
+133	equal:	stp	x29, x30, [sp, alloc_equal]!		// saves state
+134		mov	x29, sp					// saves state
+135	
+136		mov	x9, x0					// x9 = b1 pointer
+137		mov	x10, x1					// x10 = b2 pointer
+138		mov	w11, FALSE				// x11 = FALSE
+139		str	w11, [x29, return_s]			// result = x11 = FALSE
+140	
+141		// first if construct
+142		ldr	w12, [x9, box_origin + point_x]		// w12 = b1.origin.x
+143		ldr	w13, [x10, box_origin + point_x]	// w13 = b2.origin.x
+144		cmp	w12, w13				// if b1.origin.x != b2.origin.x
+145		b.ne	break					// break from if construct
+(gdb) l
+146	
+147		// second if construct
+148		ldr	w12, [x9, box_origin + point_y]		// w12 = b1.origin.y
+149		ldr	w13, [x10, box_origin + point_y]	// w13 = b2.origin.y
+150		cmp	w12, w13				// if b1.origin.y != b2.origin.y
+151		b.ne	break					// break from if construct
+152	
+153		// third if construct
+154		ldr	w12, [x9, box_size + dim_width]		// w12 = b1.size.width
+155		ldr 	w13, [x10, box_size + dim_width]	// w13 = b2.size.width
+156		cmp	w12, w13				// if b1.size.wdith != b2.size.width
+157		b.ne	break					// break from if construct
+158	
+159		// fourth if construct
+160		ldr	w12, [x9, box_size + dim_height]	// w12 = b1.size.height
+161		ldr	w13, [x10, box_size + dim_height]	// w13 = b2.size.height
+162		cmp	w12, w13				// if b1.size.height != b2.size.height
+163		b.eq	break					// break from if construct
+164	
+165		mov	w11, TRUE				// x11 = TRUE
+166		str	w11, [x29, return_s]			// result = x11 = TRUE
+167	
+168	break:	ldr	x0, [x29, return_s]			// Load/ return result value
+169		ldp	x29, x30, [sp], dealloc_equal		// retores state
+170		ret						// returns control to address in LP
+(gdb) b 144
+Breakpoint 3 at 0x40071c: file assign4.s, line 144.
+(gdb) b 150
+Breakpoint 4 at 0x40072c: file assign4.s, line 150.
+(gdb) b 156
+Breakpoint 5 at 0x40073c: file assign4.s, line 156.
+(gdb) b 162
+Breakpoint 6 at 0x40074c: file assign4.s, line 162.
+(gdb) c
+Continuing.
+
+Breakpoint 3, equal () at assign4.s:144
+144		cmp	w12, w13				// if b1.origin.x != b2.origin.x
+(gdb) p $w12
+$9 = 0
+(gdb) p $w13
+$10 = 0
+(gdb) c
+Continuing.
+
+Breakpoint 4, equal () at assign4.s:150
+150		cmp	w12, w13				// if b1.origin.y != b2.origin.y
+(gdb) cp $w132
+$11 = 0
+(gdb) p $w12c[Kp $w13
+$12 = 0
+(gdb) c
+Continuing.
+
+Breakpoint 5, equal () at assign4.s:156
+156		cmp	w12, w13				// if b1.size.wdith != b2.size.width
+(gdb) cp $w132
+$13 = 1
+(gdb) p $w12c[Kp $w13
+$14 = 1
+(gdb) c
+Continuing.
+
+Breakpoint 6, equal () at assign4.s:162
+162		cmp	w12, w13				// if b1.size.height != b2.size.height
+(gdb) cp $w132
+$15 = 1
+(gdb) p $w12c[Kp $w13
+$16 = 1
+(gdb) l
+150		cmp	w12, w13				// if b1.origin.y != b2.origin.y
+151		b.ne	break					// break from if construct
+152	
+153		// third if construct
+154		ldr	w12, [x9, box_size + dim_width]		// w12 = b1.size.width
+155		ldr 	w13, [x10, box_size + dim_width]	// w13 = b2.size.width
+156		cmp	w12, w13				// if b1.size.wdith != b2.size.width
+157		b.ne	break					// break from if construct
+158	
+159		// fourth if construct
+160		ldr	w12, [x9, box_size + dim_height]	// w12 = b1.size.height
+161		ldr	w13, [x10, box_size + dim_height]	// w13 = b2.size.height
+162		cmp	w12, w13				// if b1.size.height != b2.size.height
+163		b.eq	break					// break from if construct
+164	
+165		mov	w11, TRUE				// x11 = TRUE
+166		str	w11, [x29, return_s]			// result = x11 = TRUE
+167	
+168	break:	ldr	x0, [x29, return_s]			// Load/ return result value
+169		ldp	x29, x30, [sp], dealloc_equal		// retores state
+170		ret						// returns control to address in LP
+171	
+172	// define equates used in main
+173		alloc_main = -(16 + (2*b_size)) & -16		// allocate memory: 2 box structs
+174		dealloc_main = -alloc_main			// define dealloc
+(gdb) b 167
+Breakpoint 7 at 0x400760: file assign4.s, line 167.
+(gdb) c
+Continuing.
+
+Breakpoint 7, break () at assign4.s:169
+169		ldp	x29, x30, [sp], dealloc_equal		// retores state
+(gdb) p $w11
+$17 = 0
+(gdb) x/d $fp+16
+0xfffffffff0f0:	0
+(gdb) n
+break () at assign4.s:170
+170		ret						// returns control to address in LP
+(gdb) n
+main () at assign4.s:204
+204		cbz	x0, nequal
+(gdb) l
+192		// print values of first box
+193		ldr	x0, =first				// arg 1: first string
+194		add	x1, x29, first_s			// arg 2: first pointer
+195		bl	printBox				// execute printBox
+196		// print values of second box
+197		ldr	x0, =second				// arg 1: second string
+198		add	x1, x29, second_s			// arg 2: second pointer
+199		bl	printBox				// execute printBox
+200		// compare values in first and second
+201		add	x0, x29, first_s			// arg 1: first pointer
+202		add	x1, x29, second_s			// arg 2: second pointer
+203		bl	equal					// execute equal subroutine
+204		cbz	x0, nequal
+205		// if equal: execute move on first
+206		add	x0, x29, first_s			// arg 1: first pointer
+207		mov	w1, -5					// arg 2: deltaX = -5
+208		mov	w2, 7					// arg 3: deltaY = 7
+209		bl	move					// execute move subroutine on first
+210		// execute expand on second
+211		add	x0, x29, second_s			// x0 = second pointer
+212		mov	w1, 3					// w1 = factor = 3
+213		bl	expand					// execute expand subroutine on second
+214	
+215	nequal:	// print header 2 string
+216		adrp	x0, str3				// arg 1: Changed Value string
+(gdb) b move
+Breakpoint 8 at 0x40066c: file assign4.s, line 71.
+(gdb) c
+Continuing.
+
+Breakpoint 8, move () at assign4.s:71
+71	move:	stp	x29, x30, [sp, -16]!			// saves state
+(gdb) l
+59		str	w10, [x8, box_size + dim_width]		// set b.size.width for return
+60	
+61		ldr	w10, [x9, box_size + dim_height]	// w10 = b.size.height
+62		str	w10, [x8, box_size + dim_height]	// set b.size.height for return
+63	
+64		ldr	w10, [x9, box_area]			// w10 = b.area
+65		str	w10, [x8, box_area]			// set b.area for return
+66	
+67		ldp	x29, x30, [sp], dealloc_box		// restores state
+68		ret						// transfers control to address stored in LR
+69	
+70	// move subroutine changes the origin location of box struct
+71	move:	stp	x29, x30, [sp, -16]!			// saves state
+72		mov	x29, sp					// save state
+73		// load box origin data into temp registers
+74		ldr	w9, [x0, box_origin + point_x]		// w9 = b.origin.x
+75		ldr	w10, [x0, box_origin + point_y]		// w10 = b.origin.y
+76		// shift box origin values
+77		add	w9, w9, w1				// w9 += w1 (deltaX)
+78		add	w10, w10, w2				// w10 += w2 (deltaY)
+79		// update values on stack
+80		str	w9, [x0, box_origin + point_x]		// b.origin.x += deltaX
+81		str	w10, [x0, box_origin + point_y]		// b.origin.y += deltaY
+82	
+83		ldp	x29, x30, [sp], 16			// restores state
+(gdb) b 77
+Breakpoint 9 at 0x40067c: file assign4.s, line 77.
+(gdb) c
+Continuing.
+
+Breakpoint 9, move () at assign4.s:77
+77		add	w9, w9, w1				// w9 += w1 (deltaX)
+(gdb) p $w1
+$18 = 4294967291
+(gdb) p (int)$w1
+$19 = -5
+(gdb) p $w2
+$20 = 7
+(gdb) n
+78		add	w10, w10, w2				// w10 += w2 (deltaY)
+(gdb) n
+80		str	w9, [x0, box_origin + point_x]		// b.origin.x += deltaX
+(gdb) p $w9[K[K[K(int)$w9
+$21 = -5
+(gdb) p $w10
+$22 = 7
+(gdb) finish
+Run till exit from #0  move () at assign4.s:80
+main () at assign4.s:211
+211		add	x0, x29, second_s			// x0 = second pointer
+(gdb) l
+199		bl	printBox				// execute printBox
+200		// compare values in first and second
+201		add	x0, x29, first_s			// arg 1: first pointer
+202		add	x1, x29, second_s			// arg 2: second pointer
+203		bl	equal					// execute equal subroutine
+204		cbz	x0, nequal
+205		// if equal: execute move on first
+206		add	x0, x29, first_s			// arg 1: first pointer
+207		mov	w1, -5					// arg 2: deltaX = -5
+208		mov	w2, 7					// arg 3: deltaY = 7
+209		bl	move					// execute move subroutine on first
+210		// execute expand on second
+211		add	x0, x29, second_s			// x0 = second pointer
+212		mov	w1, 3					// w1 = factor = 3
+213		bl	expand					// execute expand subroutine on second
+214	
+215	nequal:	// print header 2 string
+216		adrp	x0, str3				// arg 1: Changed Value string
+217		add	x0, x0, :lo12:str3			// takes two steps to get address
+218		bl	printf					// execute printf
+219		// print values of first box
+220		ldr	x0, =first				// arg 1: first string
+221		add	x1, x29, first_s			// arg 2: first pointer
+222		bl	printBox				// execute printBox
+223		// print values of second box
+(gdb) b expand
+Breakpoint 10 at 0x400694: file assign4.s, line 87.
+(gdb) b 214
+Breakpoint 11 at 0x4007d4: file assign4.s, line 214.
+(gdb) c
+Continuing.
+
+Breakpoint 10, expand () at assign4.s:87
+87	expand:	stp	x29, x30, [sp, -16]!			// saves state
+(gdb) l
+75		ldr	w10, [x0, box_origin + point_y]		// w10 = b.origin.y
+76		// shift box origin values
+77		add	w9, w9, w1				// w9 += w1 (deltaX)
+78		add	w10, w10, w2				// w10 += w2 (deltaY)
+79		// update values on stack
+80		str	w9, [x0, box_origin + point_x]		// b.origin.x += deltaX
+81		str	w10, [x0, box_origin + point_y]		// b.origin.y += deltaY
+82	
+83		ldp	x29, x30, [sp], 16			// restores state
+84		ret						// transfers control to address in LR
+85	
+86	// expand subroutine scales the dimensions of box struct
+87	expand:	stp	x29, x30, [sp, -16]!			// saves state
+88		mov	x29, sp					// saves state
+89		// load box size data
+90		ldr	w9, [x0, box_size + dim_width]		// w9 = b.size.width
+91		ldr	w10, [x0, box_size + dim_height]	// w10 = b.size.height
+92		// scale box size
+93		mul	w9, w9, w1				// w9 = b.size.width * factor
+94		mul	w10, w10, w1				// w10 = b.size.height * factor
+95		// update values on stack
+96		str	w9, [x0, box_size + dim_width]		// b.size.width *= factor
+97		str	w10, [x0, box_size + dim_height]	// b.size.height *= factor
+98		// multiply width and height and update area
+99		mul	w9, w9, w10				// w9 = width * height
+(gdb) b 92
+Breakpoint 12 at 0x4006a4: file assign4.s, line 92.
+(gdb) c
+Continuing.
+
+Breakpoint 12, expand () at assign4.s:93
+93		mul	w9, w9, w1				// w9 = b.size.width * factor
+(gdb) p $w1
+$23 = 3
+(gdb) p $w9
+$24 = 1
+(gdb) p $w10
+$25 = 1
+(gdb) n
+94		mul	w10, w10, w1				// w10 = b.size.height * factor
+(gdb) n
+96		str	w9, [x0, box_size + dim_width]		// b.size.width *= factor
+(gdb) n
+97		str	w10, [x0, box_size + dim_height]	// b.size.height *= factor
+(gdb) n
+99		mul	w9, w9, w10				// w9 = width * height
+(gdb) p $w9
+$26 = 3
+(gdb) p $w10
+$27 = 3
+(gdb) finish
+Run till exit from #0  expand () at assign4.s:99
+
+Breakpoint 11, nequal () at assign4.s:217
+217		add	x0, x0, :lo12:str3			// takes two steps to get address
+(gdb) x/d $fp+26[K[K36[1@5
+0xfffffffff124:	0	0	3	3
+0xfffffffff134:	9
+(gdb) x/5d $fp+36[K[K16
+0xfffffffff110:	-5	7	1	1
+0xfffffffff120:	1
+(gdb) c
+Continuing.
+
+Changed box values:
+Box first origin = (-5, 7) width = 1 height = 1 area = 1
+Box second origin = (0, 0) width = 3 height = 3 area = 9
+[Inferior 1 (process 32336) exited with code 071]
+(gdb) q
+]0;kenneth.sharman@csa2:~/Documents/CPSC_355/A4kenneth.sharman@csa2:~/Documents/CPSC_355/A4$ exit
+exit
+
+Script done on 2018-11-05 20:34:15-07:00
