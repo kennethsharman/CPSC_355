@@ -26,7 +26,6 @@ queueElement:	.string "  %d"								// display
 queueHead:	.string " <-- head of queue"						// display
 queueTail:	.string " <-- tail of queue"						// display
 carriageReturn:	.string	"\n"								// display
-testing:	.string "I am here  %d"
 
 		.balign 4
 // enqueue subroutine (label branches with 1)
@@ -37,7 +36,7 @@ define(tail_r, w10)	// w10 = tail
 enqueue:	stp	x29, x30, [sp, -16]!			// saves state
 		mov	x29, sp					// saves state
 
-		mov	w15, w0					// store arg in w15
+		mov	w15, w0					// store arg (enqueue value) in w15
 
 		bl	queueFull				// execute queueFull subroutine
 		cmp	w0, WZR					// check if  queueFull() returned TRUE or FALSE
@@ -56,7 +55,7 @@ next1:		bl	queueEmpty				// execute queueEmpty subroutine
 		add	x12, x12, :lo12:head_m			// get low 12 address of head
 		ldr	head_r, [x12]				// w9 = head
 
-		adrp	x13, tail_m				// get addres of tail
+		adrp	x13, tail_m				// get address of tail
 		add	x13, x13, :lo12:tail_m			// get low 2 address of tail
 		ldr	tail_r, [x13]				// w10 = tail
 
@@ -95,10 +94,10 @@ dequeue:	stp	x29, x30, [sp, -16]!			// saves state
 
 		bl	queueEmpty				// execute queueEmpty subroutine
 		cmp	w0, WZR					// check is queueEmpty() returned TRUE or FALSE
-		b.eq	next2					// if queue is empty branch to nextb
+		b.eq	next2					// if queue is not empty branch to next2
 
-		adrp	x0, queueEmpt				// arg 1: address of string to be printed
-		add	x0, x0, :lo12:queueEmpt			// takes two steps to get address
+		adrp	x0, queueUnderFlow			// arg 1: address of string to be printed
+		add	x0, x0, :lo12:queueUnderFlow		// takes two steps to get address
 		bl	printf					// execute printf
 
 		mov	w0, -1					// return (-1)
@@ -106,11 +105,11 @@ dequeue:	stp	x29, x30, [sp, -16]!			// saves state
 
 next2:		adrp	x12, head_m				// get address of head
 		add	x12, x12, :lo12:head_m			// get low 12 address of head
-		ldr	head_r, [x12]				// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		ldr	head_r, [x12]				// w9 = head
 
 		adrp 	x13, tail_m				// get address of tail
 		add	x13, x13, :lo12:tail_m			// get low 12 address of tail
-		ldr	tail_r, [x13]				// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		ldr	tail_r, [x13]				// w10 = tail
 
 		adrp	x14, queue_m				// get address of queue
 		add	x14, x14, :lo12:queue_m			// get low 12 address of queue
@@ -119,16 +118,16 @@ next2:		adrp	x12, head_m				// get address of head
 		cmp	head_r, tail_r				// compare head and tail
 		b.ne	else2					// if they are not equal branch to else2
 
-		mov	head_r, -1
-		mov	tail_r, -1
-		str	head_r, [x12]
-		str	tail_r, [x13]
+		mov	head_r, -1				// head = -1
+		mov	tail_r, -1				// tail = -1
+		str	head_r, [x12]				// update global variable
+		str	tail_r, [x13]				// update global variable
 
 		b	skip_else2				// branch to skip_else2
 
 else2:		adrp	x13, head_m				// get address of head
 		add	x13, x13, :lo12:head_m			// get low 12 address of head
-		ldr	head_r, [x13]				// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		ldr	head_r, [x13]				// w9 = head
 
 		add	head_r, head_r, 1			// head += 1
 		and	head_r, head_r, MODMASK			// head = (++head & MODMASK)
@@ -177,9 +176,7 @@ queueEmpty:	stp	x29, x30, [sp, -16]!			// saves state
 
 		cmp	head_r, -1				// compare head to -1					
 		b.ne	else4					// if they are not equal branch to else4
-
 		mov	w0, TRUE				// set w0 = TRUE for return
-
 		b	done4					// skip else3
 
 else4:		mov	w0, FALSE				// set w0 = FALSE
@@ -188,19 +185,19 @@ done4:		ldp	x29, x30, [sp], 16			// restores state
 		ret						// restores state
 
 // display subroutine (label branches with 5)
-define(head_r, w19)
-define(tail_r, w20)
-define(i_r, w21)
-define(j_r, w22)
-define(count_r, w23)
+define(head_r, w19)	// w19 = head
+define(tail_r, w20)	// w20 = tail
+define(i_r, w21)	// w21 = i
+define(j_r, w22)	// w22 = j
+define(count_r, w23)	// w23 = count
 
-		alloc = -(16 + 5*4) & -16
-		dealloc	 = -alloc
-		w19_save = 16
-		w20_save = 20
-		w21_save = 24
-		w22_save = 28
-		w23_save = 32
+		alloc = -(16 + 5*4) & -16			// allocate enough memory to save state of registers
+		dealloc	 = -alloc				// dealloc equate
+		w19_save = 16					// stack offset of w19 save
+		w20_save = 20					// stack offset of w20 save
+		w21_save = 24					// stack offset of w21 save
+		w22_save = 28					// stack offest of w22 save
+		w23_save = 32					// stack offset of w23 save
 
 		.global display					// make available to other compilation units
 display:	stp	x29, x30, [sp, -alloc]!			// saves state
@@ -215,19 +212,19 @@ display:	stp	x29, x30, [sp, -alloc]!			// saves state
 		cmp	w0, WZR					// if queueEmpty retured FALSE:
 		b.eq	next5_1					// branch to next5_1
 
-		adrp	x0, queueEmpt
-		add	x0, x0, :lo12:queueEmpt
-		bl	printf
+		adrp	x0, queueEmpt				// arg 1: address of string to be printed
+		add	x0, x0, :lo12:queueEmpt			// takes two steps to get address
+		bl	printf					// execute printf
 
-		b	done5
+		b	done5					// branch to done5
 
 next5_1:	adrp	x14, head_m				// get address of head
 		add	x14, x14, :lo12:head_m			// get low 12 address of head
-		ldr	head_r, [x14]				// w9 = head
+		ldr	head_r, [x14]				// w19 = head
 
 		adrp	x15, tail_m				// get address of tail
 		add	x15, x15, :lo12:tail_m			// get low 12 address of tail
-		ldr	tail_r, [x15]				// w10 = tail
+		ldr	tail_r, [x15]				// w20 = tail
 
 		mov	count_r, tail_r				// count = tail
 		sub	count_r, count_r, head_r		// count = tail - head
@@ -276,9 +273,9 @@ next5_4:	adrp	x0, carriageReturn			// arg1: address of string to be printed
 		add	i_r, i_r, 1				// i += 1
 		and	i_r, i_r, MODMASK			// i = ++i & MODMASK
 
-		add	j_r, j_r, 1
-test:		cmp	j_r, count_r
-		b.lt	top
+		add	j_r, j_r, 1				// j += 1
+test:		cmp	j_r, count_r				// compare j to count
+		b.lt	top					// if j < count branch to top
 
 done5:		ldr	w19, [x29, w19_save]			// restore w19
 		ldr	w20, [x29, w20_save]			// restore w20
