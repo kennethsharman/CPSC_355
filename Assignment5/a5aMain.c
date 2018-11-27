@@ -1,3 +1,9 @@
+// CPSC 355:	Tutorial T06
+// Assignment:	#5a.c
+// Description:	Manipulates a queue, using functions defined in a5a.asm
+// Date:	Nov 25, 2018
+// Author:	CPSC 355 Provided Code
+
 #include <stdio.h>
 #include <stdlib.h>
 
