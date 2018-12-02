@@ -7,7 +7,7 @@ define(buf_base_r, x20)
 define(nread_r, x21)
 define(AT_FDCWD, -100)
 
-err1:	.string	"ERROR: Could not open file: %s \nExiting...\n"
+err1:	.string	"ERROR: Could not open file: %s \nTerminating Program...\n"
 err2:	.string	"ERROR: Invalid arguments, usage ./a6 <Input-File.bin>\n"
 err3:	.string	"ERROR: x out of range, x must be in range [0,90]"
 head1:	.string "\tx\t|\tx^(1/3)\n"
