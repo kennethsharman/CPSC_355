@@ -118,7 +118,7 @@ define(y_r, d18)
 define(dy_r, d19)
 define(dydx_r, d20)
 	
-	.data
+	.text
 tol_m:	.double	0r1.0e-10			// maximum error in cubed root
 
 	.text
